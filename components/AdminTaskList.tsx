@@ -26,7 +26,76 @@ export default function AdminTaskList({ tasks }: { tasks: any[] }) {
 
   return (
     <div className="overflow-hidden rounded-xl border border-gray-200 dark:border-gray-800">
-      <div className="overflow-x-auto">
+      {/* Mobile Card View */}
+      <div className="md:hidden space-y-4 p-4">
+        {tasks.map(task => (
+          <div key={task.id} className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
+            <div className="flex justify-between items-start mb-3">
+              <div>
+                <h3 className="font-bold text-gray-900 dark:text-gray-100">{task.title}</h3>
+                <p className="text-xs text-gray-500 mt-1 line-clamp-2">{task.description}</p>
+              </div>
+              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                task.status === 'COMPLETED' ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' :
+                task.status === 'IN_PROGRESS' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400' :
+                task.status === 'UNDER_REVIEW' ? 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400 animate-pulse' :
+                task.status === 'REJECTED' ? 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400' :
+                task.status === 'NO_RESPONSE' ? 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400' :
+                'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300'
+              }`}>
+                {task.status.replace('_', ' ')}
+              </span>
+            </div>
+            
+            <div className="flex items-center gap-3 mb-3 pb-3 border-b border-gray-100 dark:border-gray-700">
+              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-xs shrink-0">
+                {task.assignedTo.name.charAt(0).toUpperCase()}
+              </div>
+              <div className="min-w-0">
+                <div className="font-medium text-sm text-gray-900 dark:text-gray-100 truncate">{task.assignedTo.name}</div>
+                <div className="text-xs text-gray-500 truncate">{task.assignedTo.email}</div>
+              </div>
+            </div>
+
+            <div className="flex justify-between items-center text-xs text-gray-500 mb-4">
+              <div className={`flex items-center gap-1.5 font-bold uppercase tracking-wide ${
+                task.priority === 'HIGH' ? 'text-red-600' :
+                task.priority === 'MEDIUM' ? 'text-yellow-600' :
+                'text-green-600'
+              }`}>
+                <div className={`w-2 h-2 rounded-full ${
+                  task.priority === 'HIGH' ? 'bg-red-500' :
+                  task.priority === 'MEDIUM' ? 'bg-yellow-500' :
+                  'bg-green-500'
+                }`} />
+                {task.priority}
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="flex items-center gap-1">
+                  <Calendar size={12} />
+                  {format(new Date(task.deadline), 'MMM d')}
+                </span>
+                <span className="flex items-center gap-1">
+                  <Clock size={12} />
+                  {format(new Date(task.deadline), 'HH:mm')}
+                </span>
+              </div>
+            </div>
+
+            {task.status === 'UNDER_REVIEW' && (
+              <button 
+                onClick={() => setReviewingTask(task)}
+                className="w-full py-2 bg-purple-600 text-white rounded-lg text-sm font-medium hover:bg-purple-700 transition-colors flex items-center justify-center gap-2"
+              >
+                <Eye size={16} /> Review Submission
+              </button>
+            )}
+          </div>
+        ))}
+      </div>
+
+      {/* Desktop Table View */}
+      <div className="hidden md:block overflow-x-auto">
         <table className="w-full text-left text-sm">
           <thead className="bg-gray-50 dark:bg-gray-800/50 text-gray-500 dark:text-gray-400 uppercase tracking-wider font-semibold text-xs">
             <tr>

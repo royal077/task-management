@@ -153,7 +153,7 @@ export default function InternTaskCard({ task }: { task: any }) {
               Response required in: {Math.floor(responseLeft / 60)}m {responseLeft % 60}s
             </div>
             {!showDecline ? (
-              <div className="flex gap-3">
+              <div className="flex flex-col sm:flex-row gap-3">
                 <button onClick={() => handleRespond('ACCEPTED')} className="flex-1 bg-green-600 text-white p-3 rounded-lg hover:bg-green-700 transition-colors font-medium shadow-lg shadow-green-500/20">Accept Task</button>
                 <button onClick={() => setShowDecline(true)} className="flex-1 bg-white border border-red-200 text-red-600 p-3 rounded-lg hover:bg-red-50 transition-colors font-medium">Decline</button>
               </div>
@@ -165,7 +165,7 @@ export default function InternTaskCard({ task }: { task: any }) {
                   value={declineReason}
                   onChange={e => setDeclineReason(e.target.value)}
                 />
-                <div className="flex gap-3">
+                <div className="flex flex-col sm:flex-row gap-3">
                   <button onClick={() => handleRespond('DECLINED')} className="flex-1 bg-red-600 text-white p-2 rounded-lg hover:bg-red-700 transition-colors">Confirm</button>
                   <button onClick={() => setShowDecline(false)} className="flex-1 bg-gray-100 text-gray-700 p-2 rounded-lg hover:bg-gray-200 transition-colors">Cancel</button>
                 </div>
@@ -181,7 +181,7 @@ export default function InternTaskCard({ task }: { task: any }) {
         )}
 
         {(task.status === 'IN_PROGRESS' || task.status === 'REJECTED') && !showSubmit && (
-          <div className="flex gap-3">
+          <div className="flex flex-col sm:flex-row gap-3">
             {task.status === 'IN_PROGRESS' && (
               <button onClick={() => pauseTask(task.id)} className="flex-1 bg-yellow-500 text-white p-3 rounded-lg flex items-center justify-center gap-2 hover:bg-yellow-600 transition-colors shadow-lg shadow-yellow-500/30">
                 <Pause size={18} fill="currentColor" /> Pause
@@ -198,7 +198,7 @@ export default function InternTaskCard({ task }: { task: any }) {
             <h4 className="font-bold mb-3 text-sm uppercase tracking-wide text-gray-500">Submit Work</h4>
             
             <div className="space-y-3 mb-4">
-              <div className="flex gap-2">
+              <div className="flex flex-col sm:flex-row gap-2">
                 <input 
                   type="text" 
                   placeholder="Paste link here..." 
@@ -206,8 +206,8 @@ export default function InternTaskCard({ task }: { task: any }) {
                   value={newLink}
                   onChange={e => setNewLink(e.target.value)}
                 />
-                <button onClick={handleAddLink} className="p-2 bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-200 dark:bg-blue-900/30 dark:text-blue-400">
-                  <LinkIcon size={18} />
+                <button onClick={handleAddLink} className="p-2 bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-200 dark:bg-blue-900/30 dark:text-blue-400 flex items-center justify-center">
+                  <LinkIcon size={18} /> <span className="sm:hidden ml-2">Add Link</span>
                 </button>
               </div>
               
@@ -240,7 +240,7 @@ export default function InternTaskCard({ task }: { task: any }) {
               </div>
             )}
 
-            <div className="flex gap-3">
+            <div className="flex flex-col sm:flex-row gap-3">
               <button 
                 onClick={handleSubmitTask} 
                 disabled={submitting || submissions.length === 0}

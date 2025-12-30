@@ -28,7 +28,6 @@ export default function Footer() {
           <span className="font-mono font-bold text-blue-600 dark:text-blue-400 min-w-[20px] text-center">
             {views !== null ? views.toLocaleString() : '...'}
           </span>
-          {/* <span className="text-xs uppercase tracking-wider font-semibold">Views</span> */}
         </div>
       </div>
     </footer>
