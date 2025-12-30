@@ -1,0 +1,54 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(uuid())
+  name          String
+  email         String    @unique
+  password      String
+  role          String    // "ADMIN" or "INTERN"
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  assignedTasks Task[]    @relation("AssignedTo")
+  createdTasks  Task[]    @relation("CreatedBy")
+}
+
+model Task {
+  id             String    @id @default(uuid())
+  title          String
+  description    String
+  priority       String    // "LOW", "MEDIUM", "HIGH"
+  deadline       DateTime
+  status         String    @default("PENDING") // "PENDING", "ACCEPTED", "DECLINED", "IN_PROGRESS", "PAUSED", "COMPLETED", "NO_RESPONSE"
+  declineReason  String?
+  
+  assignedToId   String
+  assignedTo     User      @relation("AssignedTo", fields: [assignedToId], references: [id])
+  
+  createdById    String
+  createdBy      User      @relation("CreatedBy", fields: [createdById], references: [id])
+  
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  timeLogs       TimeLog[]
+}
+
+model TimeLog {
+  id        String    @id @default(uuid())
+  taskId    String
+  task      Task      @relation(fields: [taskId], references: [id])
+  startTime DateTime  @default(now())
+  endTime   DateTime?
+  type      String    // "WORK", "PAUSE"
+}
