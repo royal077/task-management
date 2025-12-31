@@ -32,6 +32,24 @@ export async function createTask(formData: FormData) {
   revalidatePath('/admin')
 }
 
+export async function deleteTask(taskId: string) {
+  const session = await auth()
+  if (!session || (session.user as any).role !== 'ADMIN') {
+    throw new Error("Unauthorized")
+  }
+
+  // Delete related records first if cascade isn't set up (Prisma usually handles this if configured, but let's be safe or rely on cascade)
+  // Assuming cascade delete is configured in schema or we just delete the task.
+  // Let's check schema.prisma first? No, let's just try deleting.
+  // Actually, timeLogs and submissions are related.
+  
+  await prisma.timeLog.deleteMany({ where: { taskId } })
+  await prisma.submission.deleteMany({ where: { taskId } })
+  await prisma.task.delete({ where: { id: taskId } })
+
+  revalidatePath('/admin')
+}
+
 export async function respondToTask(taskId: string, response: 'ACCEPTED' | 'DECLINED', reason?: string) {
   const session = await auth()
   if (!session) throw new Error("Unauthorized")
