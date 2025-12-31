@@ -8,6 +8,25 @@ export default async function InternPage() {
   const session = await auth()
   if (!session || (session.user as any).role !== 'INTERN') redirect("/")
 
+  if ((session.user as any).status !== 'APPROVED') {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] text-center space-y-6">
+        <div className="p-6 bg-yellow-100 dark:bg-yellow-900/30 rounded-full animate-pulse">
+          <Clock size={48} className="text-yellow-600 dark:text-yellow-400" />
+        </div>
+        <div className="max-w-md space-y-2">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Account Pending Approval</h1>
+          <p className="text-gray-500 dark:text-gray-400">
+            Your account is currently waiting for administrator approval. You will be able to access your dashboard once your account has been verified.
+          </p>
+        </div>
+        <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 text-sm text-gray-600 dark:text-gray-300">
+          <p>Registered Email: <span className="font-mono font-bold">{session.user?.email}</span></p>
+        </div>
+      </div>
+    )
+  }
+
   const tasks = await prisma.task.findMany({
     where: { assignedToId: (session.user as any).id },
     orderBy: { createdAt: 'desc' },

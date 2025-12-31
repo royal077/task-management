@@ -20,7 +20,7 @@ export default function Footer() {
         <div className="flex items-center gap-2">
           <span>Designed & Developed with</span>
           <Heart size={14} className="text-red-500 fill-red-500 animate-pulse" />
-          <span>by <span className="font-bold text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400 transition-colors cursor-pointer">Ashwani Kushwaha</span></span>
+          <span>by <a href="https://ashwanik.me/" target="_blank" rel="noopener noreferrer"><span className="font-bold text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400 transition-colors cursor-pointer">Ashwani Kushwaha</span></a></span>
         </div>
 
         <div className="flex items-center gap-2 bg-gray-100 dark:bg-gray-800 px-3 py-1 rounded-full border border-gray-200 dark:border-gray-700 shadow-sm">

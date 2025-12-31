@@ -54,13 +54,19 @@ export default async function AdminPage() {
 
   return (
     <div className="space-y-8 max-w-7xl mx-auto">
-      <div className="flex items-center gap-3 mb-8">
-        <div className="p-3 bg-blue-600 rounded-xl shadow-lg shadow-blue-500/30">
-          <LayoutDashboard className="text-white" size={24} />
+      <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center gap-3">
+          <div className="p-3 bg-blue-600 rounded-xl shadow-lg shadow-blue-500/30">
+            <LayoutDashboard className="text-white" size={24} />
+          </div>
+          <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-400">
+            Admin Dashboard
+          </h1>
         </div>
-        <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-400">
-          Admin Dashboard
-        </h1>
+        <a href="/admin/interns" className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors shadow-sm">
+          <Users size={20} className="text-purple-600" />
+          <span className="font-medium">Manage Interns</span>
+        </a>
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">

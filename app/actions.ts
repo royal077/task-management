@@ -4,6 +4,7 @@ import { auth } from "@/auth"
 import { prisma } from "@/lib/prisma"
 import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
+import bcrypt from "bcryptjs"
 
 export async function createTask(formData: FormData) {
   const session = await auth()
@@ -204,7 +205,62 @@ export async function reviewTask(taskId: string, decision: 'APPROVED' | 'REJECTE
 export async function getInterns() {
     const session = await auth()
     if (!session || (session.user as any).role !== 'ADMIN') return []
-    return prisma.user.findMany({ where: { role: 'INTERN' } })
+    return prisma.user.findMany({ where: { role: 'INTERN', status: 'APPROVED' } })
+}
+
+export async function getAllInterns() {
+    const session = await auth()
+    if (!session || (session.user as any).role !== 'ADMIN') return []
+    return prisma.user.findMany({ 
+      where: { role: 'INTERN' },
+      orderBy: { createdAt: 'desc' }
+    })
+}
+
+export async function registerIntern(formData: FormData) {
+  const name = formData.get('name') as string
+  const email = formData.get('email') as string
+  const password = formData.get('password') as string
+
+  if (!name || !email || !password) throw new Error("Missing fields")
+
+  const existingUser = await prisma.user.findUnique({ where: { email } })
+  if (existingUser) throw new Error("User already exists")
+
+  const hashedPassword = await bcrypt.hash(password, 10)
+
+  await prisma.user.create({
+    data: {
+      name,
+      email,
+      password: hashedPassword,
+      role: 'INTERN',
+      status: 'PENDING'
+    }
+  })
+}
+
+export async function approveIntern(internId: string) {
+  const session = await auth()
+  if (!session || (session.user as any).role !== 'ADMIN') throw new Error("Unauthorized")
+  
+  await prisma.user.update({
+    where: { id: internId },
+    data: { status: 'APPROVED' }
+  })
+  revalidatePath('/admin/interns')
+  revalidatePath('/admin')
+}
+
+export async function rejectIntern(internId: string) {
+  const session = await auth()
+  if (!session || (session.user as any).role !== 'ADMIN') throw new Error("Unauthorized")
+  
+  await prisma.user.update({
+    where: { id: internId },
+    data: { status: 'REJECTED' }
+  })
+  revalidatePath('/admin/interns')
 }
 
 import { cookies } from "next/headers"
