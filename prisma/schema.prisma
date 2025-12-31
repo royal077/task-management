@@ -32,6 +32,7 @@ model Task {
   deadline       DateTime
   status         String    @default("PENDING") // "PENDING", "ACCEPTED", "DECLINED", "IN_PROGRESS", "PAUSED", "COMPLETED", "NO_RESPONSE"
   declineReason  String?
+  sendEmail      Boolean   @default(false)
   
   assignedToId   String
   assignedTo     User      @relation("AssignedTo", fields: [assignedToId], references: [id])

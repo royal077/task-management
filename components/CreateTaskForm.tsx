@@ -96,6 +96,18 @@ export default function CreateTaskForm({ interns }: { interns: any[] }) {
         </div>
       </div>
 
+      <div className="flex items-center gap-2">
+        <input 
+          type="checkbox" 
+          name="sendEmail" 
+          id="sendEmail"
+          className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+        />
+        <label htmlFor="sendEmail" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+          Send email notification to intern
+        </label>
+      </div>
+
       <button 
         disabled={loading} 
         className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-4 rounded-xl font-bold shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed mt-4"

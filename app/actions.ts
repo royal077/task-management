@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma"
 import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
 import bcrypt from "bcryptjs"
+import { sendTaskAssignmentEmail } from "@/lib/mail"
 
 export async function createTask(formData: FormData) {
   const session = await auth()
@@ -17,8 +18,9 @@ export async function createTask(formData: FormData) {
   const priority = formData.get('priority') as string
   const deadline = formData.get('deadline') as string
   const assignedToId = formData.get('assignedToId') as string
+  const sendEmail = formData.get('sendEmail') === 'on'
 
-  await prisma.task.create({
+  const task = await prisma.task.create({
     data: {
       title,
       description,
@@ -26,8 +28,22 @@ export async function createTask(formData: FormData) {
       deadline: new Date(deadline),
       assignedToId,
       createdById: (session.user as any).id,
+      sendEmail
+    },
+    include: {
+      assignedTo: true
     }
   })
+
+  if (sendEmail && task.assignedTo.email) {
+    await sendTaskAssignmentEmail(
+      task.assignedTo.email,
+      task.title,
+      task.description,
+      task.deadline,
+      task.priority
+    )
+  }
 
   revalidatePath('/admin')
 }
