@@ -57,12 +57,6 @@ export default function LoginPage() {
         <button type="submit" className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white p-3 rounded-lg font-semibold hover:opacity-90 transition-opacity shadow-lg shadow-blue-500/30">
           Sign In
         </button>
-        
-        <div className="text-xs text-gray-400 mt-6 pt-6 border-t border-gray-100 dark:border-gray-800 text-center">
-          <p>Demo Credentials:</p>
-          <p>Admin: admin@example.com / admin123</p>
-          <p>Intern: intern@example.com / intern123</p>
-        </div>
       </form>
     </div>
   )
