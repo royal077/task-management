@@ -2,9 +2,10 @@ import { prisma } from "@/lib/prisma"
 import { notFound } from "next/navigation"
 import { User, Mail, Calendar, CheckCircle, Clock, XCircle, BookOpen } from "lucide-react"
 
-export default async function InternDetailPage({ params }: { params: { id: string } }) {
+export default async function InternDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
   const intern = await prisma.user.findUnique({
-    where: { id: params.id },
+    where: { id },
     include: {
       assignedTasks: {
         include: {
