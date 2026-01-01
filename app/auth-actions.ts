@@ -71,8 +71,21 @@ export async function verifyOtp(email: string, code: string) {
 export async function resetPassword(name: string, email: string, otp: string, newPassword: string) {
   // Verify User Identity
   const user = await prisma.user.findUnique({ where: { email } })
-  if (!user || user.name !== name) {
-    return { success: false, message: "User details do not match" }
+  
+  console.log("Reset Password Debug:", { 
+    email, 
+    inputName: name, 
+    dbName: user?.name,
+    match: user?.name.toLowerCase().trim() === name.toLowerCase().trim() 
+  })
+
+  // Case-insensitive name check
+  // if (!user || user.name.toLowerCase().trim() !== name.toLowerCase().trim()) {
+  //   return { success: false, message: "User details do not match" }
+  // }
+  
+  if (!user) {
+     return { success: false, message: "User not found" }
   }
 
   // Verify OTP

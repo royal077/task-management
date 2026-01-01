@@ -61,8 +61,8 @@ export async function sendTaskAssignmentEmail(
 }
 
 export async function sendOtpEmail(to: string, otp: string) {
-  if (!process.env.SMTP_HOST || !process.env.SMTP_USER) {
-    console.warn("SMTP credentials not set. Skipping email.");
+  if (!process.env.SMTP_HOST || !process.env.SMTP_USER || !process.env.SMTP_PASSWORD) {
+    console.error("SMTP credentials missing. Check SMTP_HOST, SMTP_USER, and SMTP_PASSWORD.");
     return;
   }
 
