@@ -86,6 +86,7 @@ export default function CreateTaskForm({ interns }: { interns: any[] }) {
         <div className="relative">
           <select name="assignedToId" required className="w-full p-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none appearance-none">
             <option value="">Select an intern...</option>
+            <option value="ALL" className="font-bold text-blue-600">All Interns (Assign to everyone)</option>
             {interns.map(intern => (
               <option key={intern.id} value={intern.id}>{intern.name} ({intern.email})</option>
             ))}

@@ -20,29 +20,65 @@ export async function createTask(formData: FormData) {
   const assignedToId = formData.get('assignedToId') as string
   const sendEmail = formData.get('sendEmail') === 'on'
 
-  const task = await prisma.task.create({
-    data: {
-      title,
-      description,
-      priority,
-      deadline: new Date(deadline),
-      assignedToId,
-      createdById: (session.user as any).id,
-      sendEmail
-    },
-    include: {
-      assignedTo: true
-    }
-  })
+  if (assignedToId === 'ALL') {
+    // Fetch all approved interns
+    const interns = await prisma.user.findMany({
+      where: {
+        role: 'INTERN',
+        status: 'APPROVED'
+      }
+    })
 
-  if (sendEmail && task.assignedTo.email) {
-    await sendTaskAssignmentEmail(
-      task.assignedTo.email,
-      task.title,
-      task.description,
-      task.deadline,
-      task.priority
-    )
+    // Create task for each intern
+    for (const intern of interns) {
+      const task = await prisma.task.create({
+        data: {
+          title,
+          description,
+          priority,
+          deadline: new Date(deadline),
+          assignedToId: intern.id,
+          createdById: (session.user as any).id,
+          sendEmail
+        }
+      })
+
+      if (sendEmail && intern.email) {
+        await sendTaskAssignmentEmail(
+          intern.email,
+          task.title,
+          task.description,
+          task.deadline,
+          task.priority
+        )
+      }
+    }
+  } else {
+    // Single assignment
+    const task = await prisma.task.create({
+      data: {
+        title,
+        description,
+        priority,
+        deadline: new Date(deadline),
+        assignedToId,
+        createdById: (session.user as any).id,
+        sendEmail
+      },
+      include: {
+        assignedTo: true
+      }
+    })
+
+    if (sendEmail && task.assignedTo.email) {
+      await sendTaskAssignmentEmail(
+        task.assignedTo.email,
+        task.title,
+        task.description,
+        task.deadline,
+        task.priority
+      )
+    }
   }
 
   revalidatePath('/admin')
