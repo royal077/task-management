@@ -39,7 +39,8 @@ export default function InternTaskCard({ task }: { task: any }) {
     if (task.status !== 'PENDING') return
     
     const updateCountdown = () => {
-      const deadline = new Date(new Date(task.createdAt).getTime() + 30 * 60000)
+      // Use the actual task deadline, not a hardcoded 30 minutes
+      const deadline = new Date(task.deadline)
       const left = differenceInSeconds(deadline, new Date())
       setResponseLeft(left > 0 ? left : 0)
     }
@@ -47,7 +48,10 @@ export default function InternTaskCard({ task }: { task: any }) {
     updateCountdown()
     const interval = setInterval(updateCountdown, 1000)
     return () => clearInterval(interval)
-  }, [task.createdAt, task.status])
+  }, [task.deadline, task.status])
+
+  // Helper boolean to check if deadline has passed
+  const isDeadlineOver = responseLeft === 0 && task.status === 'PENDING'
 
   const formatTime = (seconds: number) => {
     const h = Math.floor(seconds / 3600)
@@ -148,27 +152,35 @@ export default function InternTaskCard({ task }: { task: any }) {
       <div className="mt-6 pt-4 border-t border-gray-100 dark:border-gray-800">
         {task.status === 'PENDING' && (
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <div className="mb-3 text-sm font-bold flex items-center gap-2 text-orange-600 bg-orange-50 dark:bg-orange-900/20 p-2 rounded">
-              <Clock size={14} />
-              Response required in: {Math.floor(responseLeft / 60)}m {responseLeft % 60}s
-            </div>
-            {!showDecline ? (
-              <div className="flex flex-col sm:flex-row gap-3">
-                <button onClick={() => handleRespond('ACCEPTED')} className="flex-1 bg-green-600 text-white p-3 rounded-lg hover:bg-green-700 transition-colors font-medium shadow-lg shadow-green-500/20">Accept Task</button>
-                <button onClick={() => setShowDecline(true)} className="flex-1 bg-white border border-red-200 text-red-600 p-3 rounded-lg hover:bg-red-50 transition-colors font-medium">Decline</button>
-              </div>
-            ) : (
-              <div className="space-y-3 animate-in zoom-in-95 duration-200">
-                <textarea 
-                  placeholder="Reason for declining..." 
-                  className="w-full p-3 border rounded-lg dark:bg-gray-800 focus:ring-2 focus:ring-red-500 outline-none"
-                  value={declineReason}
-                  onChange={e => setDeclineReason(e.target.value)}
-                />
-                <div className="flex flex-col sm:flex-row gap-3">
-                  <button onClick={() => handleRespond('DECLINED')} className="flex-1 bg-red-600 text-white p-2 rounded-lg hover:bg-red-700 transition-colors">Confirm</button>
-                  <button onClick={() => setShowDecline(false)} className="flex-1 bg-gray-100 text-gray-700 p-2 rounded-lg hover:bg-gray-200 transition-colors">Cancel</button>
+            {!isDeadlineOver ? (
+              <>
+                <div className="mb-3 text-sm font-bold flex items-center gap-2 text-orange-600 bg-orange-50 dark:bg-orange-900/20 p-2 rounded">
+                  <Clock size={14} />
+                  Response required in: {Math.floor(responseLeft / 3600)}h {Math.floor((responseLeft % 3600) / 60)}m {responseLeft % 60}s
                 </div>
+                {!showDecline ? (
+                  <div className="flex flex-col sm:flex-row gap-3">
+                    <button onClick={() => handleRespond('ACCEPTED')} className="flex-1 bg-green-600 text-white p-3 rounded-lg hover:bg-green-700 transition-colors font-medium shadow-lg shadow-green-500/20">Accept Task</button>
+                    <button onClick={() => setShowDecline(true)} className="flex-1 bg-white border border-red-200 text-red-600 p-3 rounded-lg hover:bg-red-50 transition-colors font-medium">Decline</button>
+                  </div>
+                ) : (
+                  <div className="space-y-3 animate-in zoom-in-95 duration-200">
+                    <textarea 
+                      placeholder="Reason for declining..." 
+                      className="w-full p-3 border rounded-lg dark:bg-gray-800 focus:ring-2 focus:ring-red-500 outline-none"
+                      value={declineReason}
+                      onChange={e => setDeclineReason(e.target.value)}
+                    />
+                    <div className="flex flex-col sm:flex-row gap-3">
+                      <button onClick={() => handleRespond('DECLINED')} className="flex-1 bg-red-600 text-white p-2 rounded-lg hover:bg-red-700 transition-colors">Confirm</button>
+                      <button onClick={() => setShowDecline(false)} className="flex-1 bg-gray-100 text-gray-700 p-2 rounded-lg hover:bg-gray-200 transition-colors">Cancel</button>
+                    </div>
+                  </div>
+                )}
+              </>
+            ) : (
+              <div className="text-center text-red-600 font-bold flex items-center justify-center gap-2 bg-red-50 dark:bg-red-900/20 p-4 rounded-lg border border-red-100 dark:border-red-900">
+                <Clock size={20} /> Deadline Over - Task Expired
               </div>
             )}
           </div>
