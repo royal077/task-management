@@ -272,6 +272,26 @@ export async function reviewTask(taskId: string, decision: 'APPROVED' | 'REJECTE
   revalidatePath('/intern')
 }
 
+export async function reassignTask(taskId: string) {
+  const session = await auth()
+  if (!session || (session.user as any).role !== 'ADMIN') throw new Error("Unauthorized")
+
+  const task = await prisma.task.findUnique({ where: { id: taskId } })
+  if (!task) throw new Error("Task not found")
+
+  await prisma.task.update({
+    where: { id: taskId },
+    data: { 
+      createdAt: new Date(), // Reset timer
+      status: 'PENDING',     // Reset status
+      title: task.title.includes("(Reassigned)") ? task.title : `(Reassigned) ${task.title}`
+    }
+  })
+
+  revalidatePath('/admin')
+  revalidatePath('/intern')
+}
+
 export async function getInterns() {
     const session = await auth()
     if (!session || (session.user as any).role !== 'ADMIN') return []

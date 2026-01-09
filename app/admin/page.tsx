@@ -10,28 +10,32 @@ export default async function AdminPage() {
   const session = await auth()
   if (!session || (session.user as any).role !== 'ADMIN') redirect("/")
 
-  const tasks = await prisma.task.findMany({
-    include: { assignedTo: true, submissions: true, timeLogs: true }, // Added timeLogs
-    orderBy: { createdAt: 'desc' }
+  const latestTasks = await prisma.task.findMany({
+    distinct: ['assignedToId'],
+    orderBy: [
+      { assignedToId: 'asc' },
+      { createdAt: 'desc' }
+    ],
+    include: { assignedTo: true, submissions: true, timeLogs: true },
   })
-  
-  // Group tasks by assignedToId and keep only the latest one
-  const latestTasksMap = new Map();
-  tasks.forEach(task => {
-    if (!task.assignedToId) return;
-    if (!latestTasksMap.has(task.assignedToId)) {
-      latestTasksMap.set(task.assignedToId, task);
-    }
-  });
 
-  const latestTasks = Array.from(latestTasksMap.values());
+  // Sort by most recently created/updated
+  latestTasks.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
 
   const interns = await getInterns()
+  
+  // Parallel efficient counting
+  const [total, completed, inProgress, noResponse] = await Promise.all([
+    prisma.task.count(),
+    prisma.task.count({ where: { status: 'COMPLETED' } }),
+    prisma.task.count({ where: { status: 'IN_PROGRESS' } }),
+    prisma.task.count({ where: { status: 'NO_RESPONSE' } })
+  ]);
 
   const stats = [
     { 
       label: "Total Tasks", 
-      value: tasks.length, 
+      value: total, 
       icon: ListTodo, 
       color: "text-blue-600", 
       bg: "bg-blue-100 dark:bg-blue-900/30",
@@ -39,7 +43,7 @@ export default async function AdminPage() {
     },
     { 
       label: "Completed", 
-      value: tasks.filter(t => t.status === 'COMPLETED').length, 
+      value: completed, 
       icon: CheckCircle, 
       color: "text-green-600", 
       bg: "bg-green-100 dark:bg-green-900/30",
@@ -47,7 +51,7 @@ export default async function AdminPage() {
     },
     { 
       label: "In Progress", 
-      value: tasks.filter(t => t.status === 'IN_PROGRESS').length, 
+      value: inProgress, 
       icon: Clock, 
       color: "text-yellow-600", 
       bg: "bg-yellow-100 dark:bg-yellow-900/30",
@@ -55,13 +59,14 @@ export default async function AdminPage() {
     },
     { 
       label: "No Response", 
-      value: tasks.filter(t => t.status === 'NO_RESPONSE').length, 
+      value: noResponse, 
       icon: AlertCircle, 
       color: "text-red-600", 
       bg: "bg-red-100 dark:bg-red-900/30",
       border: "border-red-200 dark:border-red-800"
     },
   ]
+
 
   return (
     <div className="space-y-8 max-w-7xl mx-auto">

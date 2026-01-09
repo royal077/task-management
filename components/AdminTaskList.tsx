@@ -1,8 +1,8 @@
 'use client'
 import { format } from "date-fns"
-import { MoreHorizontal, Calendar, Clock, AlertCircle, Eye, Check, X, ExternalLink, FileText, Trash2, CornerDownLeft } from "lucide-react"
+import { MoreHorizontal, Calendar, Clock, AlertCircle, Eye, Check, X, ExternalLink, FileText, Trash2, CornerDownLeft, RefreshCw } from "lucide-react"
 import { useState, useEffect, useRef } from "react"
-import { reviewTask, deleteTask } from "@/app/actions"
+import { reviewTask, deleteTask, reassignTask } from "@/app/actions"
 
 export default function AdminTaskList({ tasks }: { tasks: any[] }) {
   const [reviewingTask, setReviewingTask] = useState<any>(null)
@@ -46,6 +46,20 @@ export default function AdminTaskList({ tasks }: { tasks: any[] }) {
       setActiveMenu(null)
     } catch (e) {
       alert("Error deleting task")
+    } finally {
+      setProcessing(false)
+    }
+  }
+
+  const handleReassign = async (taskId: string) => {
+    if (!confirm("Reassign this task? This will reset the timer.")) return
+    
+    setProcessing(true)
+    try {
+      await reassignTask(taskId)
+      setActiveMenu(null)
+    } catch (e) {
+      alert("Error reassigning task")
     } finally {
       setProcessing(false)
     }
@@ -168,7 +182,7 @@ export default function AdminTaskList({ tasks }: { tasks: any[] }) {
         <table className="w-full text-left text-sm">
           <thead className="bg-gray-50 dark:bg-gray-800/50 text-gray-500 dark:text-gray-400 uppercase tracking-wider font-semibold text-xs">
             <tr>
-              <th className="p-4">Task Details</th>
+              {/* <th className="p-4">Task Details</th> */}
               <th className="p-4">Assigned To</th>
               <th className="p-4">Status</th>
               <th className="p-4">Priority</th>
@@ -179,10 +193,10 @@ export default function AdminTaskList({ tasks }: { tasks: any[] }) {
           <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
             {tasks.map(task => (
               <tr key={task.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/30 transition-colors group">
-                <td className="p-4">
+                {/* <td className="p-4">
                   <div className="font-bold text-gray-900 dark:text-gray-100">{task.title}</div>
                   <div className="text-xs text-gray-500 mt-1 truncate max-w-[200px]">{task.description}</div>
-                </td>
+                </td> */}
                 <td className="p-4">
                   <div className="flex items-center gap-2">
                     <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-xs">
@@ -263,6 +277,16 @@ export default function AdminTaskList({ tasks }: { tasks: any[] }) {
                       >
                         <Trash2 size={16} /> Delete Task
                       </button>
+
+                      {(task.status === 'PENDING' || task.status === 'NO_RESPONSE') && 
+                        (new Date().getTime() - new Date(task.createdAt).getTime() > 30 * 60 * 1000) && (
+                        <button 
+                          onClick={() => handleReassign(task.id)}
+                          className="w-full text-left px-4 py-3 text-sm hover:bg-orange-50 dark:hover:bg-orange-900/20 text-orange-600 flex items-center gap-2 border-t border-gray-100 dark:border-gray-700"
+                        >
+                          <RefreshCw size={16} /> Reassign Task
+                        </button>
+                      )}
                     </div>
                   )}
                 </td>
