@@ -34,12 +34,52 @@ export default async function PerformersPage() {
       // 2. Reassigned Penalty
       if (task.title.includes("(Reassigned)")) reassignedCount++;
 
-      // 3. Work Hours
-      const activeLogs = task.timeLogs.filter(l => l.type === 'WORK');
-      activeLogs.forEach(log => {
+      // 3. Work Hours - Robust Calculation with Interval Merging
+      // This fixes "inflation" bugs where multiple active logs overlap or run too long
+      const activeLogs = task.timeLogs.filter((l: any) => l.type === 'WORK');
+      const ranges: { start: number, end: number }[] = [];
+
+      activeLogs.forEach((log: any) => {
         const start = new Date(log.startTime).getTime();
-        const end = log.endTime ? new Date(log.endTime).getTime() : new Date().getTime();
-        totalSeconds += (end - start) / 1000;
+        let end = log.endTime ? new Date(log.endTime).getTime() : new Date().getTime();
+        
+        // Anti-Inflation: Ignore "Ghost" logs (open but task not in progress)
+        if (!log.endTime && task.status !== 'IN_PROGRESS') return;
+
+        // Anti-Inflation: Cap single sessions at 12 hours (43200000 ms)
+        if (end - start > 43200000) end = start + 43200000;
+
+        if (end > start) {
+            ranges.push({ start, end });
+        }
+      });
+
+      // Sort by start time
+      ranges.sort((a, b) => a.start - b.start);
+
+      // Merge overlapping (or contained) intervals
+      // E.g., [10:00-11:00] and [10:30-11:30] becomes [10:00-11:30] (1.5h instead of 2h)
+      const mergedRanges: { start: number, end: number }[] = [];
+      if (ranges.length > 0) {
+        let current = ranges[0];
+        
+        for (let i = 1; i < ranges.length; i++) {
+            const next = ranges[i];
+            if (next.start < current.end) {
+                // Overlap detected: extend current end if next goes further
+                current.end = Math.max(current.end, next.end);
+            } else {
+                // No overlap: push current and start new
+                mergedRanges.push(current);
+                current = next;
+            }
+        }
+        mergedRanges.push(current);
+      }
+
+      // Sum strictly non-overlapping time
+      mergedRanges.forEach(range => {
+        totalSeconds += (range.end - range.start) / 1000;
       });
 
       // 4. Promptness / Response Speed
