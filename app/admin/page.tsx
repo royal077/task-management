@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma"
 import CreateTaskForm from "@/components/CreateTaskForm"
 import AdminTaskList from "@/components/AdminTaskList"
 import { getInterns } from "@/app/actions"
-import { CheckCircle, Clock, AlertCircle, ListTodo, Users, LayoutDashboard } from "lucide-react"
+import { CheckCircle, Clock, AlertCircle, ListTodo, Users, LayoutDashboard, Trophy, Award } from "lucide-react"
 
 export default async function AdminPage() {
   const session = await auth()
@@ -100,7 +100,30 @@ export default async function AdminPage() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-1">
+        <div className="lg:col-span-1 space-y-6">
+           <div className="bg-gradient-to-br from-yellow-500 to-orange-600 text-white p-6 rounded-2xl shadow-xl shadow-orange-500/20 relative overflow-hidden group hover:scale-[1.02] transition-transform cursor-pointer">
+            <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:opacity-20 transition-opacity">
+              <Trophy size={120} />
+            </div>
+            
+            <div className="relative z-10">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="p-2 bg-white/20 backdrop-blur-sm rounded-lg">
+                  <Award size={24} />
+                </div>
+                <h2 className="text-xl font-bold">Top Performers</h2>
+              </div>
+              
+              <p className="text-orange-50 mb-6 text-sm">
+                View the leaderboard ranked by efficiency, task completion, and punctuality.
+              </p>
+              
+              <a href="/admin/performers" className="inline-flex items-center gap-2 px-5 py-2.5 bg-white text-orange-600 font-bold rounded-xl shadow-lg hover:bg-gray-50 transition-colors">
+                View Leaderboard <Trophy size={16} />
+              </a>
+            </div>
+          </div>
+
           <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-md p-6 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-800 sticky top-24">
             <div className="flex items-center gap-2 mb-6">
               <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg">

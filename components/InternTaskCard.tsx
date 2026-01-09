@@ -24,10 +24,25 @@ export default function InternTaskCard({ task }: { task: any }) {
     // Work timer
     const calculateElapsed = () => {
       let total = 0
-      task.timeLogs.forEach((log: any) => {
+      let activeLogFound = false;
+      
+      // Sort logs to process active ones intelligently (though checking all is safer)
+      // We only want ONE active log to contribute to "ticking" to avoid 2x/3x speed speedups
+      const sortedLogs = [...task.timeLogs].sort((a: any, b: any) => 
+        new Date(b.startTime).getTime() - new Date(a.startTime).getTime()
+      );
+
+      sortedLogs.forEach((log: any) => {
         if (log.type === 'WORK') {
-          const end = log.endTime ? new Date(log.endTime) : new Date()
-          total += differenceInSeconds(end, new Date(log.startTime))
+          if (log.endTime) {
+            // Completed session - always safe to add
+            total += differenceInSeconds(new Date(log.endTime), new Date(log.startTime))
+          } else if (!activeLogFound) {
+            // Only count the FIRST (latest) active session we find
+            // This prevents "double speed" if DB has multiple open logs due to race conditions
+            total += differenceInSeconds(new Date(), new Date(log.startTime))
+            activeLogFound = true;
+          }
         }
       })
       setElapsed(total)

@@ -30,7 +30,10 @@ export default async function InternPage() {
   const tasks = await prisma.task.findMany({
     where: { assignedToId: (session.user as any).id },
     orderBy: { createdAt: 'desc' },
-    include: { timeLogs: true, submissions: true }
+    include: { 
+      timeLogs: { orderBy: { startTime: 'desc' } }, 
+      submissions: true 
+    }
   })
 
   const stats = [

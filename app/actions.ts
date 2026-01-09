@@ -136,10 +136,15 @@ export async function startTask(taskId: string) {
   const session = await auth()
   if (!session) throw new Error("Unauthorized")
 
-  // Stop any currently running task for this user? 
-  // For simplicity, let's assume one active task at a time or just log it.
-  // But to be "accurate", we should probably stop others. 
-  // Let's just start this one.
+  // FIX: Close ALL open logs for this task to prevent "double active" data corruption
+  // This solves the timer running "super fast" if multiple start requests hit simultaneously
+  await prisma.timeLog.updateMany({
+    where: { 
+      taskId, 
+      endTime: null 
+    },
+    data: { endTime: new Date() }
+  })
 
   await prisma.task.update({
     where: { id: taskId },
